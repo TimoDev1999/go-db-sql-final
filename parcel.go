@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 )
 
 type ParcelStore struct {
@@ -34,7 +33,7 @@ func (s ParcelStore) Get(number int) (Parcel, error) {
 	var p Parcel
 	err := s.db.QueryRow("SELECT number, client, status, address, created_at FROM parcel WHERE number = ?", number).Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
 	if err != nil {
-		return p, err
+		return Parcel{}, err
 	}
 	return p, nil
 }
@@ -84,19 +83,9 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 }
 
 func (s ParcelStore) Delete(number int) error {
-	// Проверяем статус посылки
-	parcel, err := s.Get(number)
-	if err != nil {
-		return err
-	}
-
-	if parcel.Status != ParcelStatusRegistered {
-		return fmt.Errorf("parcel can only be deleted if status is registered")
-	}
-
-	_, err = s.db.Exec(
-		"DELETE FROM parcel WHERE number = ?",
-		number,
+	_, err := s.db.Exec(
+		"DELETE FROM parcel WHERE number = ? AND status = ?",
+		number, ParcelStatusRegistered,
 	)
 	return err
 }

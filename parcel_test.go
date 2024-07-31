@@ -46,9 +46,10 @@ func TestAddGetDelete(t *testing.T) {
 	// get
 	storedParcel, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, parcel.Client, storedParcel.Client)
-	require.Equal(t, parcel.Status, storedParcel.Status)
-	require.Equal(t, parcel.Address, storedParcel.Address)
+
+	storedParcel.Number = parcel.Number
+
+	require.Equal(t, parcel, storedParcel)
 
 	// delete
 	err = store.Delete(id)
@@ -149,9 +150,7 @@ func TestGetByClient(t *testing.T) {
 	for _, parcel := range storedParcels {
 		storedParcel, exists := parcelMap[parcel.Number]
 		require.True(t, exists)
-		require.Equal(t, storedParcel.Client, parcel.Client)
-		require.Equal(t, storedParcel.Status, parcel.Status)
-		require.Equal(t, storedParcel.Address, parcel.Address)
-		//
+		storedParcel.Number = parcel.Number
+		require.Equal(t, storedParcel, parcel)
 	}
 }
