@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// in-memory использование таблиц требует дополнительного создания новой таблицы временной, насколько я понял... не стоит пытаться прыгать выше головы))
 var (
 	// randSource источник псевдо случайных чисел.
 	// Для повышения уникальности в качестве seed
@@ -31,7 +32,7 @@ func getTestParcel() Parcel {
 // TestAddGetDelete проверяет добавление, получение и удаление посылки
 func TestAddGetDelete(t *testing.T) {
 	// prepare
-	db, err := sql.Open("sqlite", ":memory:") // используем in-memory базу данных для тестов
+	db, err := sql.Open("sqlite", "tracker.db")
 	require.NoError(t, err)
 	defer db.Close()
 
@@ -46,9 +47,7 @@ func TestAddGetDelete(t *testing.T) {
 	// get
 	storedParcel, err := store.Get(id)
 	require.NoError(t, err)
-
-	storedParcel.Number = parcel.Number
-
+	parcel.Number = id
 	require.Equal(t, parcel, storedParcel)
 
 	// delete
@@ -62,7 +61,7 @@ func TestAddGetDelete(t *testing.T) {
 
 // TestSetAddress проверяет обновление адреса
 func TestSetAddress(t *testing.T) {
-	db, err := sql.Open("sqlite", ":memory:") // используем in-memory базу данных для тестов
+	db, err := sql.Open("sqlite", "tracker.db")
 	require.NoError(t, err)
 	defer db.Close()
 
@@ -87,7 +86,7 @@ func TestSetAddress(t *testing.T) {
 
 // TestSetStatus проверяет обновление статуса
 func TestSetStatus(t *testing.T) {
-	db, err := sql.Open("sqlite", ":memory:") // используем in-memory базу данных для тестов
+	db, err := sql.Open("sqlite", "tracker.db")
 	require.NoError(t, err)
 	defer db.Close()
 
@@ -112,7 +111,7 @@ func TestSetStatus(t *testing.T) {
 
 // TestGetByClient проверяет получение посылок по идентификатору клиента
 func TestGetByClient(t *testing.T) {
-	db, err := sql.Open("sqlite", ":memory:") // используем in-memory базу данных для тестов
+	db, err := sql.Open("sqlite", "tracker.db")
 	require.NoError(t, err)
 	defer db.Close()
 
@@ -150,7 +149,6 @@ func TestGetByClient(t *testing.T) {
 	for _, parcel := range storedParcels {
 		storedParcel, exists := parcelMap[parcel.Number]
 		require.True(t, exists)
-		storedParcel.Number = parcel.Number
 		require.Equal(t, storedParcel, parcel)
 	}
 }
